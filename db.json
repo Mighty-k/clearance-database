@@ -1,159 +1,183 @@
 {
-  "students": [
-    {
-      "name": "Jason Martins John",
-      "matricNumber": "20/3001",
-      "password": "student123",
-      "department": "Computer Science",
-      "departmentCode": "CS",
-      "course": "B.Sc. Computer Science",
-      "gender": "male",
-      "phoneNumber": "1234567890",
-      "dateOfBirth": "1998-05-15",
-      "monthOfGraduation": "July",
-      "clearanceRequest": "true",
-      "HOD-approval": "true",
-      "BURSARY-approval": "true",
-      "LIBRARY-approval": "true",
-      "BOOKSHOP-approval": "true",
-      "EGWHITE-approval": "true",
-      "BUTH-approval": "true",
-      "ALUMNI-approval": "false",
-      "SECURITY-approval": "false",
-      "VPSD-approval": "false",
-      "REGISTRY-approval": "false",
-      "id": "cbb8",
-      "message": "no messages"
-    },
-    {
-      "name": "James Joe Don",
-      "matricNumber": "20/3002",
-      "password": "student456",
-      "department": "Electrical Engineering",
-      "course": "B.Eng. Electrical Engineering",
-      "gender": "Female",
-      "phoneNumber": "9876543210",
-      "dateOfBirth": "1999-02-20",
-      "monthOfGraduation": "July",
-      "clearanceRequest": "true",
-      "HOD-approval": "true",
-      "BURSARY-approval": "true",
-      "LIBRARY-approval": "true",
-      "BOOKSHOP-approval": "true",
-      "EGWHITE-approval": "true",
-      "BUTH-approval": "true",
-      "ALUMNI-approval": "true",
-      "SECURITY-approval": "true",
-      "VPSD-approval": "true",
-      "REGISTRY-approval": "true",
-      "message": "no messages",
-      "id": "27a0"
-    },
-    {
-      "name": "Mighty Ryan Gold",
-      "matricNumber": "20/3003",
-      "password": "student789",
-      "department": "Computer Science",
-      "course": "B.Eng. Computer Science",
-      "gender": "Male",
-      "phoneNumber": "9876543210",
-      "dateOfBirth": "1999-02-20",
-      "monthOfGraduation": "July",
-      "clearanceRequest": "true",
-      "HOD-approval": "true",
-      "BURSARY-approval": "true",
-      "LIBRARY-approval": "false",
-      "BOOKSHOP-approval": "false",
-      "EGWHITE-approval": "false",
-      "BUTH-approval": "false",
-      "ALUMNI-approval": "false",
-      "SECURITY-approval": "false",
-      "VPSD-approval": "false",
-      "REGISTRY-approval": "false",
-      "message": "no messages",
-      "id": "27a3"
-    }
-  ],
-  "admins": [
-    {
-      "username": "bursary",
-      "password": "bursaryadmin",
-      "fullName": "Bursary Administrator",
-      "department": "BURSARY",
-      "id": "5809"
-    },
-    {
-      "username": "library",
-      "password": "libraryadmin",
-      "fullName": "Library Administrator",
-      "department": "LIBRARY",
-      "id": "0e95"
-    },
-    {
-      "username": "bookshop",
-      "password": "bookshopadmin",
-      "fullName": "Bookshop Administrator",
-      "department": "BOOKSHOP",
-      "id": "fd0f"
-    },
-    {
-      "username": "egwhite",
-      "password": "egwhiteadmin",
-      "fullName": "E. G. White Administrator",
-      "department": "EGWHITE",
-      "id": "36fe"
-    },
-    {
-      "username": "buth",
-      "password": "buthadmin",
-      "fullName": "BU Teaching Hospital Administrator",
-      "department": "BUTH",
-      "id": "2359"
-    },
-    {
-      "username": "alumni",
-      "password": "alumniadmin",
-      "fullName": "Alumni Administrator",
-      "department": "ALUMNI",
-      "id": "85cf"
-    },
-    {
-      "username": "security",
-      "password": "securityadmin",
-      "fullName": "Security Administrator",
-      "department": "SECURITY",
-      "id": "983c"
-    },
-    {
-      "username": "vpsd",
-      "password": "vpsdadmin",
-      "fullName": "Vice President - Student Affairs Administrator",
-      "department": "VPSD",
-      "id": "224f"
-    },
-    {
-      "username": "registry",
-      "password": "registryadmin",
-      "fullName": "Registrar",
-      "department": "registry",
-      "id": "238v"
-    }
-  ],
-  "hods": [
-    {
-      "department": "Computer Science",
-      "departmentCode": "CS",
-      "username": "hod_cs",
-      "password": "hodcs123",
-      "fullName": "James Doe Andrey",
-      "id": "8a83"
-    },
-    {
-      "department": "Electrical Engineering",
-      "username": "hod_ee",
-      "password": "hodee123",
-      "fullName": "Head of Department - Electrical Engineering",
-      "id": "0d16"
-    }
-  ]
-}
+    "students": [
+      {
+        "name": "Jason Martins John",
+        "matricNumber": "20/3001",
+        "password": "student123",
+        "department": "Computer Science",
+        "departmentCode": "CS",
+        "course": "B.Sc. Computer Science",
+        "gender": "male",
+        "phoneNumber": "1234567890",
+        "dateOfBirth": "1998-05-15",
+        "monthOfGraduation": "July",
+        "clearanceRequest": "true",
+        "HOD-approval": "approved",
+        "BURSARY-approval": "approved",
+        "LIBRARY-approval": "approved",
+        "BOOKSHOP-approval": "approved",
+        "EGWHITE-approval": "approved",
+        "BUTH-approval": "approved",
+        "ALUMNI-approval": "pending",
+        "SECURITY-approval": "pending",
+        "VPSD-approval": "pending",
+        "REGISTRY-approval": "pending",
+        "id": "cbb8",
+        "message": "no messages"
+      },
+      {
+        "name": "James Joe Don",
+        "matricNumber": "20/3002",
+        "password": "student456",
+        "department": "Electrical Engineering",
+        "course": "B.Eng. Electrical Engineering",
+        "gender": "Female",
+        "phoneNumber": "9876543210",
+        "dateOfBirth": "1999-02-20",
+        "monthOfGraduation": "July",
+        "clearanceRequest": "true",
+        "HOD-approval": "approved",
+        "BURSARY-approval": "approved",
+        "LIBRARY-approval": "approved",
+        "BOOKSHOP-approval": "approved",
+        "EGWHITE-approval": "approved",
+        "BUTH-approval": "approved",
+        "ALUMNI-approval": "approved",
+        "SECURITY-approval": "approved",
+        "VPSD-approval": "approved",
+        "REGISTRY-approval": "approved",
+        "message": "no messages",
+        "id": "27a0"
+      },
+      {
+        "name": "Peter Griffen Andrew",
+        "matricNumber": "20/3004",
+        "password": "student5",
+        "department": "Computer Science",
+        "course": "B.Eng. Computer Science",
+        "gender": "Male",
+        "phoneNumber": "9876543210",
+        "dateOfBirth": "1999-02-20",
+        "monthOfGraduation": "July",
+        "clearanceRequest": "false",
+        "HOD-approval": "pending",
+        "BURSARY-approval": "pending",
+        "LIBRARY-approval": "pending",
+        "BOOKSHOP-approval": "pending",
+        "EGWHITE-approval": "pending",
+        "BUTH-approval": "pending",
+        "ALUMNI-approval": "pending",
+        "SECURITY-approval": "pending",
+        "VPSD-approval": "pending",
+        "REGISTRY-approval": "pending",
+        "message": "no messages",
+        "id": "17a3"
+      },
+      {
+        "name": "Mighty Ryan Gold",
+        "matricNumber": "20/3003",
+        "password": "student789",
+        "department": "Computer Science",
+        "course": "B.Eng. Computer Science",
+        "gender": "Male",
+        "phoneNumber": "9876543210",
+        "dateOfBirth": "1999-02-20",
+        "monthOfGraduation": "July",
+        "clearanceRequest": "true",
+        "HOD-approval": "approved",
+        "BURSARY-approval": "approved",
+        "LIBRARY-approval": "pending",
+        "BOOKSHOP-approval": "pending",
+        "EGWHITE-approval": "pending",
+        "BUTH-approval": "pending",
+        "ALUMNI-approval": "pending",
+        "SECURITY-approval": "pending",
+        "VPSD-approval": "pending",
+        "REGISTRY-approval": "pending",
+        "message": "no messages",
+        "id": "27a3"
+      }
+    ],
+    "admins": [
+      {
+        "username": "bursary",
+        "password": "bursaryadmin",
+        "fullName": "Bursary Administrator",
+        "department": "BURSARY",
+        "id": "5809"
+      },
+      {
+        "username": "library",
+        "password": "libraryadmin",
+        "fullName": "Library Administrator",
+        "department": "LIBRARY",
+        "id": "0e95"
+      },
+      {
+        "username": "bookshop",
+        "password": "bookshopadmin",
+        "fullName": "Bookshop Administrator",
+        "department": "BOOKSHOP",
+        "id": "fd0f"
+      },
+      {
+        "username": "egwhite",
+        "password": "egwhiteadmin",
+        "fullName": "E. G. White Administrator",
+        "department": "EGWHITE",
+        "id": "36fe"
+      },
+      {
+        "username": "buth",
+        "password": "buthadmin",
+        "fullName": "BU Teaching Hospital Administrator",
+        "department": "BUTH",
+        "id": "2359"
+      },
+      {
+        "username": "alumni",
+        "password": "alumniadmin",
+        "fullName": "Alumni Administrator",
+        "department": "ALUMNI",
+        "id": "85cf"
+      },
+      {
+        "username": "security",
+        "password": "securityadmin",
+        "fullName": "Security Administrator",
+        "department": "SECURITY",
+        "id": "983c"
+      },
+      {
+        "username": "vpsd",
+        "password": "vpsdadmin",
+        "fullName": "Vice President - Student Affairs Administrator",
+        "department": "VPSD",
+        "id": "224f"
+      },
+      {
+        "username": "registry",
+        "password": "registryadmin",
+        "fullName": "Registrar",
+        "department": "registry",
+        "id": "238v"
+      }
+    ],
+    "hods": [
+      {
+        "department": "Computer Science",
+        "departmentCode": "CS",
+        "username": "hod_cs",
+        "password": "hodcs123",
+        "fullName": "James Doe Andrey",
+        "id": "8a83"
+      },
+      {
+        "department": "Electrical Engineering",
+        "username": "hod_ee",
+        "password": "hodee123",
+        "fullName": "Head of Department - Electrical Engineering",
+        "id": "0d16"
+      }
+    ]
+  }
