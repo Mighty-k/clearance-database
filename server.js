@@ -32,6 +32,11 @@ const saveData = (data) => {
   fs.writeFileSync("db.json", JSON.stringify(data, null, 2));
 };
 
+//route for root
+app.get("/", (req, res) => {
+    res.send("Welcome to the root endpoint!");
+  });  
+
 // Routes for handling students
 app.get("/students", (req, res) => {
   const data = loadData();
