@@ -23,7 +23,8 @@
       "VPSD-approval": "pending",
       "REGISTRY-approval": "pending",
       "id": "cbb8",
-      "message": "no messages"
+      "message": "no messages",
+      "role" :"student"
     },
     {
       "name": "James Joe Don",
@@ -47,6 +48,7 @@
       "VPSD-approval": "approved",
       "REGISTRY-approval": "approved",
       "message": "no messages",
+      "role" :"student",
       "id": "27a0"
     },
     {
@@ -71,6 +73,7 @@
       "VPSD-approval": "pending",
       "REGISTRY-approval": "pending",
       "message": "no messages",
+      "role" :"student",
       "id": "17a3"
     },
     {
@@ -95,6 +98,7 @@
       "VPSD-approval": "pending",
       "REGISTRY-approval": "pending",
       "message": "no messages",
+      "role" :"student",
       "id": "27a3"
     }
   ],
@@ -104,6 +108,7 @@
       "password": "bursaryadmin",
       "fullName": "Bursary Administrator",
       "department": "BURSARY",
+      "role":"admin",
       "id": "5809"
     },
     {
@@ -111,6 +116,7 @@
       "password": "libraryadmin",
       "fullName": "Library Administrator",
       "department": "LIBRARY",
+      "role":"admin",
       "id": "0e95"
     },
     {
@@ -118,6 +124,7 @@
       "password": "bookshopadmin",
       "fullName": "Bookshop Administrator",
       "department": "BOOKSHOP",
+      "role":"admin",
       "id": "fd0f"
     },
     {
@@ -125,6 +132,7 @@
       "password": "egwhiteadmin",
       "fullName": "E. G. White Administrator",
       "department": "EGWHITE",
+      "role":"admin",
       "id": "36fe"
     },
     {
@@ -132,6 +140,7 @@
       "password": "buthadmin",
       "fullName": "BU Teaching Hospital Administrator",
       "department": "BUTH",
+      "role":"admin",
       "id": "2359"
     },
     {
@@ -139,6 +148,7 @@
       "password": "alumniadmin",
       "fullName": "Alumni Administrator",
       "department": "ALUMNI",
+      "role":"admin",
       "id": "85cf"
     },
     {
@@ -146,6 +156,7 @@
       "password": "securityadmin",
       "fullName": "Security Administrator",
       "department": "SECURITY",
+      "role":"admin",
       "id": "983c"
     },
     {
@@ -153,6 +164,7 @@
       "password": "vpsdadmin",
       "fullName": "Vice President - Student Affairs Administrator",
       "department": "VPSD",
+      "role":"admin",
       "id": "224f"
     },
     {
@@ -160,6 +172,7 @@
       "password": "registryadmin",
       "fullName": "Registrar",
       "department": "registry",
+      "role":"admin",
       "id": "238v"
     }
   ],
@@ -170,6 +183,7 @@
       "username": "hod_cs",
       "password": "hodcs123",
       "fullName": "James Doe Andrey",
+      "role":"hod",
       "id": "8a83"
     },
     {
@@ -177,6 +191,7 @@
       "username": "hod_ee",
       "password": "hodee123",
       "fullName": "Head of Department - Electrical Engineering",
+      "role":"hod",
       "id": "0d16"
     }
   ]

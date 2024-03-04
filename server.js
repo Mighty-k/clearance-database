@@ -6,7 +6,70 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 app.use(bodyParser.json());
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: true
+}));
 
+const dbFilePath = './database.json';
+
+// Load data from the JSON database
+const data = fs.readFileSync(dbFilePath);
+const { students, admins, hods } = JSON.parse(data);
+
+// Authentication route
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  let user = null;
+
+  // Check if the username starts with "hod_"
+  if (username.startsWith('hod_')) {
+    user = hods.find(hod => hod.username === username);
+  } else if (username.includes('/')) {
+    user = students.find(student => student.matricNumber === username);
+  } else {
+    user = admins.find(admin => admin.username === username);
+  }
+
+  // Check if user exists
+  if (!user) {
+    return res.status(401).send('Invalid username or password');
+  }
+
+  // Compare passwords
+  const passwordMatch = await bcrypt.compare(password, user.password);
+  if (!passwordMatch) {
+    return res.status(401).send('Invalid username or password');
+  }
+
+  // Store user role in session
+  req.session.userRole = user.role; // assuming role is stored in user data
+
+  res.status(200).send('Login successful');
+});
+
+// Dashboard route
+app.get('/dashboard', (req, res) => {
+  // Check user role from session and send appropriate dashboard data
+  const userRole = req.session.userRole;
+  // Return dashboard data based on user role
+  // Example:
+  if (userRole === 'student') {
+    res.json({ dashboard: 'student-dashboard' });
+  } else if (userRole === 'admin') {
+    res.json({ dashboard: 'admin' });
+  } else if (userRole === 'hod') {
+    res.json({ dashboard: 'hod' });
+  } else {
+    res.status(403).send('Unauthorized');
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
 // Middleware to handle CORS (if needed)
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
