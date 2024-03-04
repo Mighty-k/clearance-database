@@ -1,9 +1,10 @@
 const express = require("express");
+const session = require("express-session")
 const bodyParser = require("body-parser");
 const fs = require("fs");
 
 const app = express();
-const port = process.env.PORT || 8080;
+const PORT = 3004;
 
 app.use(bodyParser.json());
 app.use(session({
@@ -12,7 +13,7 @@ app.use(session({
   saveUninitialized: true
 }));
 
-const dbFilePath = './database.json';
+const dbFilePath = 'db.json';
 
 // Load data from the JSON database
 const data = fs.readFileSync(dbFilePath);
@@ -67,9 +68,6 @@ app.get('/dashboard', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
 // Middleware to handle CORS (if needed)
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -182,6 +180,6 @@ app.get("/hods/:department", (req, res) => {
 });
 
 // Start server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on PORT ${PORT}`);
 });
