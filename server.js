@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const fs = require("fs");
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(bodyParser.json());
 app.use(session({
@@ -282,3 +282,4 @@ const filterStudentsByAdminRole = (queryParams, admins, students) => {
 app.listen(PORT, () => {
   console.log(`Server is running on PORT ${PORT}`);
 });
+
