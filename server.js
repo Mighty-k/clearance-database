@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const fs = require("fs");
 
 const app = express();
-const PORT = 3004;
+const PORT = 3001;
 
 app.use(bodyParser.json());
 app.use(session({
@@ -19,61 +19,12 @@ const dbFilePath = 'db.json';
 const data = fs.readFileSync(dbFilePath);
 const { students, admins, hods } = JSON.parse(data);
 
-// Authentication route
-app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-
-  let user = null;
-
-  // Check if the username starts with "hod_"
-  if (username.startsWith('hod_')) {
-    user = hods.find(hod => hod.username === username);
-  } else if (username.includes('/')) {
-    user = students.find(student => student.matricNumber === username);
-  } else {
-    user = admins.find(admin => admin.username === username);
-  }
-
-  // Check if user exists
-  if (!user) {
-    return res.status(401).send('Invalid username or password');
-  }
-
-  // Compare passwords
-  const passwordMatch = await bcrypt.compare(password, user.password);
-  if (!passwordMatch) {
-    return res.status(401).send('Invalid username or password');
-  }
-
-  // Store user role in session
-  req.session.userRole = user.role; // assuming role is stored in user data
-
-  res.status(200).send('Login successful');
-});
-
-// Dashboard route
-app.get('/dashboard', (req, res) => {
-  // Check user role from session and send appropriate dashboard data
-  const userRole = req.session.userRole;
-  // Return dashboard data based on user role
-  // Example:
-  if (userRole === 'student') {
-    res.json({ dashboard: 'student-dashboard' });
-  } else if (userRole === 'admin') {
-    res.json({ dashboard: 'admin' });
-  } else if (userRole === 'hod') {
-    res.json({ dashboard: 'hod' });
-  } else {
-    res.status(403).send('Unauthorized');
-  }
-});
-
 // Middleware to handle CORS (if needed)
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
+    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
@@ -93,6 +44,66 @@ const saveData = (data) => {
   fs.writeFileSync("db.json", JSON.stringify(data, null, 2));
 };
 
+// Authentication route
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  let user = null;
+
+  // Check if the username starts with "hod_"
+  if (username.startsWith('hod_')) {
+    user = hods.find(hod => hod.username === username);
+  } else if (username.includes('/')) {
+    user = students.find(student => student.matricNumber === username);
+  } else {
+    user = admins.find(admin => admin.username === username);
+  }
+
+  // Check if user exists
+  if (!user) {
+    return res.status(401).send('Invalid username or password');
+  }
+
+  // Compare passwords
+  if (password !== user.password) {
+    return res.status(401).send('Invalid username or password');
+  }
+
+  req.session.user = user; // Store the entire user object in session
+  
+  res.status(200).send({ dashboard: user.role, user: user }); // Return user object along with the role
+});
+
+// Logout route
+app.get('/logout', (req, res) => {
+  req.session.destroy(); // Destroy the session to clear user data
+  res.status(200).send('Logout successful');
+});
+
+// Dashboard route
+app.get('/dashboard', (req, res) => {
+  if (!req.session.userRole) {
+    return res.status(403).send('Unauthorized');
+  }
+  // Check user role from session and send appropriate dashboard data
+  const userRole = req.session.userRole;
+  // Return dashboard data based on user role
+  if (userRole === 'student') {
+    res.json({ dashboard: 'student'});
+    console.log('User Role:', req.session.userRole); // Log user role
+  } else if (userRole === 'admin') {
+    res.json({ dashboard: 'admin' });
+    console.log('User Role:', req.session.userRole);
+  } else if (userRole === 'hod') {
+    res.json({ dashboard: 'hod' });
+    console.log('User Role:', req.session.userRole);
+  } else {
+    res.status(403).send('Unauthorized');
+  }
+});
+
+
+
 //route for root
 app.get("/", (req, res) => {
     res.send("Welcome to the root endpoint!");
@@ -100,9 +111,24 @@ app.get("/", (req, res) => {
 
 // Routes for handling students
 app.get("/students", (req, res) => {
-  const data = loadData();
-  res.json(data.students);
+  const { clearanceRequest } = req.query;
+
+  // Filter students based on clearance request
+  let filteredStudents = students.filter(student => student.clearanceRequest === "true");
+
+  // Loop through each admin to filter based on department approval status
+  admins.forEach(admin => {
+    // Check if the admin's approval status is 'approved'
+    if (admin[`${admin.username.toUpperCase()}-approval`] === "approved") {
+      // Filter students based on the approval status of the corresponding department
+      filteredStudents = filteredStudents.filter(student => student[`${admin.department.toUpperCase()}-approval`] === "pending");
+    }
+  });
+
+  res.json(filteredStudents);
 });
+
+
 
 app.get("/students/:id", (req, res) => {
   const data = loadData();
@@ -134,6 +160,27 @@ app.put("/students/:id", (req, res) => {
     res.status(404).json({ message: "Student not found" });
   }
 });
+
+// Update student data by ID
+app.patch("/students/:id", (req, res) => {
+  const { id } = req.params;
+  const { body } = req;
+  const data = loadData();
+
+  // Find the index of the student with the provided ID
+  const index = data.students.findIndex((student) => student.id === id);
+
+  // If the student is found, update their data
+  if (index !== -1) {
+    data.students[index] = { ...data.students[index], ...body };
+    saveData(data);
+    res.json(data.students[index]);
+  } else {
+    // If the student is not found, return a 404 error
+    res.status(404).json({ message: "Student not found" });
+  }
+});
+
 
 app.delete("/students/:id", (req, res) => {
   const data = loadData();
@@ -178,6 +225,58 @@ app.get("/hods/:department", (req, res) => {
     res.status(404).json({ message: "HOD not found" });
   }
 });
+// filtering students by admins
+const filterStudentsByAdminRole = (queryParams, admins, students) => {
+  const { clearanceRequest } = queryParams;
+  const admin = admins.find(admin => admin.username === queryParams.adminUsername);
+  if (!admin) {
+    return []; // If admin not found, return empty array
+  }
+  
+  let filteredStudents = students.filter(student => {
+    // Apply filtering based on admin's role and approval statuses
+    switch (admin.username.toUpperCase()) {
+      case "BURSARY":
+        return (student.HOD-approval === "approved" && student.BURSARY-approval === "pending") ||
+               student.BURSARY-approval === "approved" || student.BURSARY-approval === "rejected";
+      case "LIBRARY":
+        return (student.BURSARY-approval === "approved" && student.LIBRARY-approval === "pending") ||
+               student.LIBRARY-approval === "approved" || student.LIBRARY-approval === "rejected";
+      case "BOOKSHOP":
+        return (student.LIBRARY-approval === "approved" && student.BOOKSHOP-approval === "pending") ||
+               student.BOOKSHOP-approval === "approved" || student.BOOKSHOP-approval === "rejected";
+      case "EGWHITE":
+        return (student.BOOKSHOP-approval === "approved" && student.EGWHITE-approval === "pending"  ) ||
+               student.EGWHITE-approval === "approved" || student.EGWHITE-approval === "rejected";
+      case "BUTH":
+        return (student.EGWHITE-approval === "approved" && student.BUTH-approval === "pending") ||
+               student.BUTH-approval === "approved" || student.BUTH-approval === "rejected";
+      case "ALUMNI":
+        return (student.BUTH-approval === "approved" && student.ALUMNI-approval === "pending") ||
+               student.ALUMNI-approval === "approved" || student.ALUMNI-approval === "rejected";
+      case "SECURITY":
+        return (student.ALUMNI-approval === "approved" && student.SECURITY-approval === "pending") ||
+               student.SECURITY-approval === "approved" || student.SECURITY-approval === "rejected";
+      case "VPSD":
+        return (student.SECURITY-approval === "approved" && student.VPSD-approval === "pending") ||
+               student.VPSD-approval === "approved" || student.VPSD-approval === "rejected";
+      case "REGISTRY":
+        return (student.VPSD-approval === "approved" && student.REGISTRY-approval === "pending") ||
+               student.REGISTRY-approval === "approved" || student.REGISTRY-approval === "rejected";
+      
+      default:
+        return false; // If admin role not found, return false
+    }
+  });
+
+  // Optionally, filter by clearance request status
+  if (clearanceRequest) {
+    filteredStudents = filteredStudents.filter(student => student.clearanceRequest === true);
+  }
+
+  return filteredStudents;
+};
+
 
 // Start server
 app.listen(PORT, () => {

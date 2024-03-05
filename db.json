@@ -22,9 +22,9 @@
       "SECURITY-approval": "pending",
       "VPSD-approval": "pending",
       "REGISTRY-approval": "pending",
+      "role": "student",
       "id": "cbb8",
-      "message": "no messages",
-      "role" :"student"
+      "message": "no messages"
     },
     {
       "name": "James Joe Don",
@@ -48,7 +48,7 @@
       "VPSD-approval": "approved",
       "REGISTRY-approval": "approved",
       "message": "no messages",
-      "role" :"student",
+      "role": "student",
       "id": "27a0"
     },
     {
@@ -73,8 +73,33 @@
       "VPSD-approval": "pending",
       "REGISTRY-approval": "pending",
       "message": "no messages",
-      "role" :"student",
+      "role": "student",
       "id": "17a3"
+    },
+    {
+      "name": "Joseph Prince Borris",
+      "matricNumber": "20/3005",
+      "password": "student6",
+      "department": "Computer Science",
+      "course": "B.Eng. Computer Science",
+      "gender": "Male",
+      "phoneNumber": "9876543210",
+      "dateOfBirth": "1999-02-20",
+      "monthOfGraduation": "July",
+      "clearanceRequest": "true",
+      "HOD-approval": "approved",
+      "BURSARY-approval": "pending",
+      "LIBRARY-approval": "pending",
+      "BOOKSHOP-approval": "pending",
+      "EGWHITE-approval": "pending",
+      "BUTH-approval": "pending",
+      "ALUMNI-approval": "pending",
+      "SECURITY-approval": "pending",
+      "VPSD-approval": "pending",
+      "REGISTRY-approval": "pending",
+      "message": "no messages",
+      "role": "student",
+      "id": "17b6"
     },
     {
       "name": "Mighty Ryan Gold",
@@ -89,8 +114,8 @@
       "clearanceRequest": "true",
       "HOD-approval": "approved",
       "BURSARY-approval": "approved",
-      "LIBRARY-approval": "pending",
-      "BOOKSHOP-approval": "pending",
+      "LIBRARY-approval": "approved",
+      "BOOKSHOP-approval": "approved",
       "EGWHITE-approval": "pending",
       "BUTH-approval": "pending",
       "ALUMNI-approval": "pending",
@@ -98,7 +123,7 @@
       "VPSD-approval": "pending",
       "REGISTRY-approval": "pending",
       "message": "no messages",
-      "role" :"student",
+      "role": "student",
       "id": "27a3"
     }
   ],
@@ -108,7 +133,7 @@
       "password": "bursaryadmin",
       "fullName": "Bursary Administrator",
       "department": "BURSARY",
-      "role":"admin",
+      "role": "admin",
       "id": "5809"
     },
     {
@@ -116,7 +141,7 @@
       "password": "libraryadmin",
       "fullName": "Library Administrator",
       "department": "LIBRARY",
-      "role":"admin",
+      "role": "admin",
       "id": "0e95"
     },
     {
@@ -124,7 +149,7 @@
       "password": "bookshopadmin",
       "fullName": "Bookshop Administrator",
       "department": "BOOKSHOP",
-      "role":"admin",
+      "role": "admin",
       "id": "fd0f"
     },
     {
@@ -132,7 +157,7 @@
       "password": "egwhiteadmin",
       "fullName": "E. G. White Administrator",
       "department": "EGWHITE",
-      "role":"admin",
+      "role": "admin",
       "id": "36fe"
     },
     {
@@ -140,7 +165,7 @@
       "password": "buthadmin",
       "fullName": "BU Teaching Hospital Administrator",
       "department": "BUTH",
-      "role":"admin",
+      "role": "admin",
       "id": "2359"
     },
     {
@@ -148,7 +173,7 @@
       "password": "alumniadmin",
       "fullName": "Alumni Administrator",
       "department": "ALUMNI",
-      "role":"admin",
+      "role": "admin",
       "id": "85cf"
     },
     {
@@ -156,7 +181,7 @@
       "password": "securityadmin",
       "fullName": "Security Administrator",
       "department": "SECURITY",
-      "role":"admin",
+      "role": "admin",
       "id": "983c"
     },
     {
@@ -164,7 +189,7 @@
       "password": "vpsdadmin",
       "fullName": "Vice President - Student Affairs Administrator",
       "department": "VPSD",
-      "role":"admin",
+      "role": "admin",
       "id": "224f"
     },
     {
@@ -172,7 +197,7 @@
       "password": "registryadmin",
       "fullName": "Registrar",
       "department": "registry",
-      "role":"admin",
+      "role": "admin",
       "id": "238v"
     }
   ],
@@ -183,7 +208,7 @@
       "username": "hod_cs",
       "password": "hodcs123",
       "fullName": "James Doe Andrey",
-      "role":"hod",
+      "role": "hod",
       "id": "8a83"
     },
     {
@@ -191,7 +216,7 @@
       "username": "hod_ee",
       "password": "hodee123",
       "fullName": "Head of Department - Electrical Engineering",
-      "role":"hod",
+      "role": "hod",
       "id": "0d16"
     }
   ]
