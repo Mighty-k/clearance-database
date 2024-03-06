@@ -109,36 +109,97 @@ app.get("/", (req, res) => {
     res.send("Welcome to the root endpoint!");
   });  
 
-// Routes for handling students
-// Routes for handling students
+// Function to filter students by admin role
+
+// Route handler for /students
 app.get("/students", (req, res) => {
-  const { clearanceRequest } = req.query;
-  const { user } = req.session;
+  res.json(students);
+});
 
-  // Filter students based on clearance request
-  let filteredStudents = students.filter(student => student.clearanceRequest === "true");
-
-  // Check if clearance request is false
-  if (clearanceRequest === "false") {
-    filteredStudents = []; // If clearance request is false, return empty array
-  } else if (user && user.role !== 'student') {
-    // If the user is an admin, filter students based on approval statuses
-    const adminRoles = ['HOD', 'BURSARY', 'LIBRARY', 'BOOKSHOP', 'EGWHITE', 'BUTH', 'ALUMNI', 'SECURITY', 'VPSD', 'REGISTRY'];
-    const adminIndex = adminRoles.indexOf(user.role);
-
-    if (adminIndex !== -1) {
-      for (let i = 0; i < adminIndex; i++) {
-        const admin = adminRoles[i];
-        filteredStudents = filteredStudents.filter(student => student[`${admin}-approval`] === "approved");
-      }
-      filteredStudents = filteredStudents.filter(student => student[`${user.role}-approval`] === "pending");
-    }
+const filterStudentsByAdminRole = (queryParams, students) => {
+  console.log("Query Params:", queryParams);
+  const { clearanceRequest, adminUsername } = queryParams;
+  const admin = admins.find(admin => admin.username === adminUsername);
+  console.log("admin:", admin);
+  if (!admin) {
+    return []; // If admin not found, return empty array
   }
+
+  let filteredStudents = students.filter(student => {
+    // Apply filtering based on admin's role and approval statuses
+    switch (admin.username.toUpperCase()) {
+      case "BURSARY":
+        return (
+          (student["HOD-approval"] === "approved" && student["BURSARY-approval"] === "pending") ||
+          student["BURSARY-approval"] === "approved" || student["BURSARY-approval"] === "rejected" );
+      case "LIBRARY":
+        return (
+          (student["BURSARY-approval"] === "approved" && student["LIBRARY-approval"] === "pending") ||
+          student["LIBRARY-approval"] === "approved" || student["LIBRARY-approval"] === "rejected" );
+      case "BOOKSHOP":
+        return (
+          (student["LIBRARY-approval"] === "approved" && student["BOOKSHOP-approval"] === "pending") ||
+          student["BOOKSHOP-approval"] === "approved" || student["BOOKSHOP-approval"] === "rejected"       );
+      case "EGWHITE":
+        return (
+          (student["BOOKSHOP-approval"] === "approved" && student["EGWHITE-approval"] === "pending") ||
+          student["EGWHITE-approval"] === "approved" || student["EGWHITE-approval"] === "rejected"      );
+      case "BUTH":
+        return (
+          (student["EGWHITE-approval"] === "approved" && student["BUTH-approval"] === "pending") ||
+          student["BUTH-approval"] === "approved" || student["BUTH-approval"] === "rejected"   );
+      case "ALUMNI":
+        return (
+          (student["BUTH-approval"] === "approved" && student["ALUMNI-approval"] === "pending") ||
+          student["ALUMNI-approval"] === "approved" || student["ALUMNI-approval"] === "rejected"     );
+      case "SECURITY":
+        return (
+          (student["ALUMNI-approval"] === "approved" && student["SECURITY-approval"] === "pending") ||
+          student["SECURITY-approval"] === "approved" || student["SECURITY-approval"] === "rejected"       );
+      case "VPSD":
+        return (
+          (student["SECURITY-approval"] === "approved" && student["VPSD-approval"] === "pending") ||
+          student["VPSD-approval"] === "approved" || student["VPSD-approval"] === "rejected"   );
+      case "REGISTRY":
+        return (
+          (student["VPSD-approval"] === "approved" && student["REGISTRY-approval"] === "pending") ||
+          student["REGISTRY-approval"] === "approved" || student["REGISTRY-approval"] === "rejected"       );
+      default:
+        return false; // If admin department not found, return false
+    }
+  });
+
+  // Optionally, filter by clearance request status
+  if (clearanceRequest) {
+    filteredStudents = filteredStudents.filter(student => student.clearanceRequest === "true");
+  }
+  console.log("Filtered Students:", filteredStudents);
+  return filteredStudents;
+};
+
+app.get("/filteredStudents", (req, res) => {
+  const { clearanceRequest, adminUsername } = req.query;
+
+  // Call filterStudentsByAdminRole function and pass admin as an argument
+  const filteredStudents = filterStudentsByAdminRole({ clearanceRequest, adminUsername }, students);
 
   res.json(filteredStudents);
 });
 
+app.get("/hod/students", (req, res) => {
+  const { clearanceRequest, hodApproval, department } = req.query;
+  console.log("req_Quer: ", req.query);
 
+  let filteredStudents = students.filter(student => {
+    return student.clearanceRequest === (clearanceRequest === "true") && student["HOD-approval"] === hodApproval 
+    || student["HOD-approval"] === "rejected" || student["HOD-approval"] === "approved";
+  });
+  console.log("filtered students hod: ", filteredStudents);
+  if (department) {
+    filteredStudents = filteredStudents.filter(student => student.department === department);
+  }
+  res.json(filteredStudents);
+});
 
 
 app.get("/students/:id", (req, res) => {
@@ -236,58 +297,6 @@ app.get("/hods/:department", (req, res) => {
     res.status(404).json({ message: "HOD not found" });
   }
 });
-// filtering students by admins
-const filterStudentsByAdminRole = (queryParams, admins, students) => {
-  const { clearanceRequest } = queryParams;
-  const admin = admins.find(admin => admin.username === queryParams.adminUsername);
-  if (!admin) {
-    return []; // If admin not found, return empty array
-  }
-  
-  let filteredStudents = students.filter(student => {
-    // Apply filtering based on admin's role and approval statuses
-    switch (admin.username.toUpperCase()) {
-      case "BURSARY":
-        return (student.HOD-approval === "approved" && student.BURSARY-approval === "pending") ||
-               student.BURSARY-approval === "approved" || student.BURSARY-approval === "rejected";
-      case "LIBRARY":
-        return (student.BURSARY-approval === "approved" && student.LIBRARY-approval === "pending") ||
-               student.LIBRARY-approval === "approved" || student.LIBRARY-approval === "rejected";
-      case "BOOKSHOP":
-        return (student.LIBRARY-approval === "approved" && student.BOOKSHOP-approval === "pending") ||
-               student.BOOKSHOP-approval === "approved" || student.BOOKSHOP-approval === "rejected";
-      case "EGWHITE":
-        return (student.BOOKSHOP-approval === "approved" && student.EGWHITE-approval === "pending"  ) ||
-               student.EGWHITE-approval === "approved" || student.EGWHITE-approval === "rejected";
-      case "BUTH":
-        return (student.EGWHITE-approval === "approved" && student.BUTH-approval === "pending") ||
-               student.BUTH-approval === "approved" || student.BUTH-approval === "rejected";
-      case "ALUMNI":
-        return (student.BUTH-approval === "approved" && student.ALUMNI-approval === "pending") ||
-               student.ALUMNI-approval === "approved" || student.ALUMNI-approval === "rejected";
-      case "SECURITY":
-        return (student.ALUMNI-approval === "approved" && student.SECURITY-approval === "pending") ||
-               student.SECURITY-approval === "approved" || student.SECURITY-approval === "rejected";
-      case "VPSD":
-        return (student.SECURITY-approval === "approved" && student.VPSD-approval === "pending") ||
-               student.VPSD-approval === "approved" || student.VPSD-approval === "rejected";
-      case "REGISTRY":
-        return (student.VPSD-approval === "approved" && student.REGISTRY-approval === "pending") ||
-               student.REGISTRY-approval === "approved" || student.REGISTRY-approval === "rejected";
-      
-      default:
-        return false; // If admin role not found, return false
-    }
-  });
-
-  // Optionally, filter by clearance request status
-  if (clearanceRequest) {
-    filteredStudents = filteredStudents.filter(student => student.clearanceRequest === true);
-  }
-
-  return filteredStudents;
-};
-
 
 // Start server
 app.listen(PORT, () => {
