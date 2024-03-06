@@ -110,23 +110,34 @@ app.get("/", (req, res) => {
   });  
 
 // Routes for handling students
+// Routes for handling students
 app.get("/students", (req, res) => {
   const { clearanceRequest } = req.query;
+  const { user } = req.session;
 
   // Filter students based on clearance request
   let filteredStudents = students.filter(student => student.clearanceRequest === "true");
 
-  // Loop through each admin to filter based on department approval status
-  admins.forEach(admin => {
-    // Check if the admin's approval status is 'approved'
-    if (admin[`${admin.username.toUpperCase()}-approval`] === "approved") {
-      // Filter students based on the approval status of the corresponding department
-      filteredStudents = filteredStudents.filter(student => student[`${admin.department.toUpperCase()}-approval`] === "pending");
+  // Check if clearance request is false
+  if (clearanceRequest === "false") {
+    filteredStudents = []; // If clearance request is false, return empty array
+  } else if (user && user.role !== 'student') {
+    // If the user is an admin, filter students based on approval statuses
+    const adminRoles = ['HOD', 'BURSARY', 'LIBRARY', 'BOOKSHOP', 'EGWHITE', 'BUTH', 'ALUMNI', 'SECURITY', 'VPSD', 'REGISTRY'];
+    const adminIndex = adminRoles.indexOf(user.role);
+
+    if (adminIndex !== -1) {
+      for (let i = 0; i < adminIndex; i++) {
+        const admin = adminRoles[i];
+        filteredStudents = filteredStudents.filter(student => student[`${admin}-approval`] === "approved");
+      }
+      filteredStudents = filteredStudents.filter(student => student[`${user.role}-approval`] === "pending");
     }
-  });
+  }
 
   res.json(filteredStudents);
 });
+
 
 
 
