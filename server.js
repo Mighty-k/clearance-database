@@ -330,6 +330,7 @@ app.get("/students", (req, res) => {
   res.json(students);
 });
 app.get("/otpRecords", (req, res) => {
+  const otpRecords = data.otpRecords;
   res.json(otpRecords);
 });
 
