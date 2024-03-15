@@ -329,6 +329,9 @@ app.get("/", (req, res) => {
 app.get("/students", (req, res) => {
   res.json(students);
 });
+app.get("/otpRecords", (req, res) => {
+  res.json(otpRecords);
+});
 
 const filterStudentsByAdminRole = (queryParams, students) => {
   console.log("Query Params:", queryParams);
