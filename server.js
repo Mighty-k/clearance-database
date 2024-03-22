@@ -338,7 +338,6 @@ app.post('/regenerate-otp', (req, res) => {
 
 // Logout route
 app.get('/logout', (req, res) => {
-  req.session.destroy(); // Destroy the session to clear user data
   res.status(200).send('Logout successful');
   
 });
