@@ -1,8 +1,13 @@
 const express = require("express");
 const session = require("express-session")
 const otpGenerator = require('otp-generator');
+const router = express.Router();
 const nodemailer = require('nodemailer');
 const bodyParser = require("body-parser");
+const addStudentRoutes = require('./Routes/studentRoutes');
+const addAdminRoutes = require('./Routes/adminRoutes');
+const addHodRoutes = require('./Routes/hodRoutes');
+const allUsers = require('./Routes/getallRoutes')
 const fs = require("fs");
 const dotenv = require("dotenv");
 dotenv.config()
@@ -18,11 +23,13 @@ app.use(session({
   saveUninitialized: true
 }));
 
+
+
 const dbFilePath = 'db.json';
 
 // Load data from the JSON database
 const data = fs.readFileSync(dbFilePath);
-const { students, admins, hods } = JSON.parse(data);
+const { students, admins, hods, superAdmin } = JSON.parse(data);
 
 // Middleware to handle CORS (if needed)
 app.use((req, res, next) => {
@@ -37,7 +44,9 @@ app.use((req, res, next) => {
   );
   next();
 });
-
+app.use('/api', addStudentRoutes);
+app.use('/api', addHodRoutes);
+app.use('/api/users', allUsers);
 // Load data from JSON file
 const loadData = () => {
   const rawData = fs.readFileSync("db.json");
@@ -77,7 +86,7 @@ const sendOTPByEmail = (email, otp) => {
       from: '"FYCL" kng.seun1@gmail.com',
       to: email,
       subject: 'OTP for Login',
-      text: `Your OTP for login is: ${otp}`
+      text: `Your OTP for login is: ${otp} it will expire in the next 5 minutes`
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -176,7 +185,7 @@ const getUserByEmail = (email) => {
   }
 
   // Assuming you have users stored in different arrays (students, admins, hods)
-  const userTypes = ['students', 'admins', 'hods'];
+  const userTypes = ['students', 'admins', 'hods', 'superAdmin'];
   
   for (const userType of userTypes) {
     const users = data[userType];
@@ -218,20 +227,63 @@ app.post('/login', (req, res) => {
   // Compare passwords  
   if (password !== user.password) {
     return res.status(401).send('Invalid username or password');
-  }else if(user.role === 'student'){
+  }else if(user.role === 'student')
+  {
     return res.status(200).send({ dashboard: user.role, user });
 
-  }else{
-   // Generate OTP, send email, and save OTP record
-   generateOTPAndSendEmail(user.id, user.email) // Pass user ID and email to the function
-   .then(otp => {
-     return res.status(200).send({ dashboard: 'otp', user, otp });
-   })
-   .catch(error => {
-     return res.status(500).send('Error generating OTP and sending email');
-   });
   }
+    else{
+     // Generate OTP, send email, and save OTP record
+     generateOTPAndSendEmail(user.id, user.email) // Pass user ID and email to the function
+     .then(otp => {
+       return res.status(200).send({ dashboard: 'otp', user, otp });
+     })
+     .catch(error => {
+       return res.status(500).send('Error generating OTP and sending email');
+     });
+    }
 });
+
+
+app.post('/logadmin',(req, res) => {
+  const { username, password } = req.body;
+
+  let user = null;
+  user = superAdmin.find(supreadmin => supreadmin.username === username);
+  if (!user) {
+    return res.status(401).send('Invalid username or password');
+  }
+  req.session.user = user; // Store the entire user object in session
+  if (password !== user.password) {
+    return res.status(401).send('Invalid username or password');
+  }else if(user.role === 'superAdmin')
+  {
+    generateOTPAndSendEmail(user.id, user.email) // Pass user ID and email to the function
+    .then(otp => {
+      return res.status(200).send({ dashboard: otp, user, otp});
+      // return res.status(200).send({ dashboard: 'otp', user, otp });
+    })
+    .catch(error => {
+      return res.status(500).send('Error generating OTP and sending email');
+    });
+
+
+  }
+
+})
+// Assuming you have an endpoint for updating user details
+app.patch("/api/users/:id", (req, res) => {
+  const userId = req.params.id;
+  const updatedUserData = req.body; // Assuming the updated data is sent in the request body
+
+  // Update the user details in the database
+  // Example: update user with userId in the JSON database
+  // Example code: db.updateUser(userId, updatedUserData);
+
+  // Send a response indicating success or failure
+  res.status(200).json({ message: "User details updated successfully" });
+});
+
 
 // Endpoint to verify OTP
 app.post('/verify-otp', (req, res) => {
@@ -274,7 +326,7 @@ app.post('/regenerate-otp', (req, res) => {
   if (!user) {
     return res.status(404).send({ error: 'User not found' });
   }
-console.log("user: ",user);
+// console.log("user: ",user);
   // Generate a new OTP
  // Generate OTP, send email, and save OTP record
  updateOTPAndSendEmail(user.id, user.email) // Pass user ID and email to the function
@@ -292,6 +344,7 @@ console.log("user: ",user);
 app.get('/logout', (req, res) => {
   req.session.destroy(); // Destroy the session to clear user data
   res.status(200).send('Logout successful');
+  
 });
 
 // Dashboard route
@@ -335,10 +388,10 @@ app.get("/otpRecords", (req, res) => {
 });
 
 const filterStudentsByAdminRole = (queryParams, students) => {
-  console.log("Query Params:", queryParams);
-  const { clearanceRequest, adminUsername } = queryParams;
-  const admin = admins.find(admin => admin.username === adminUsername);
-  console.log("admin:", admin);
+  // console.log("Query Params:", queryParams);
+  const { clearanceRequest, officerUsername } = queryParams;
+  const admin = admins.find(admin => admin.username === officerUsername);
+  // console.log("admin:", admin);
   if (!admin) {
     return []; // If admin not found, return empty array
   }
@@ -391,25 +444,25 @@ const filterStudentsByAdminRole = (queryParams, students) => {
   if (clearanceRequest) {
     filteredStudents = filteredStudents.filter(student => student.clearanceRequest === "true");
   }
-  console.log("Filtered Students:", filteredStudents);
+  // console.log("Filtered Students:", filteredStudents);
   return filteredStudents;
 };
 
-app.get("/filteredStudents", (req, res) => {
-  const { clearanceRequest, adminUsername } = req.query;
+  app.get("/filteredStudents", (req, res) => {
+    const { clearanceRequest, officerUsername } = req.query;
 
-  // Call filterStudentsByAdminRole function and pass admin as an argument
-  const filteredStudents = filterStudentsByAdminRole({ clearanceRequest, adminUsername }, students);
+    // Call filterStudentsByAdminRole function and pass admin as an argument
+    const filteredStudents = filterStudentsByAdminRole({ clearanceRequest, officerUsername }, students);
 
-  res.json(filteredStudents);
-});
+    res.json(filteredStudents);
+  });
 
 app.get("/hod/students", (req, res) => {
   const { clearanceRequest, hodApproval, department } = req.query;
   console.log("req_Quer: ", req.query);
 
   let filteredStudents = students.filter(student => {
-    return student.clearanceRequest === (clearanceRequest === "true") && student["HOD-approval"] === hodApproval 
+    return student.clearanceRequest === clearanceRequest && student["HOD-approval"] === hodApproval 
     || student["HOD-approval"] === "rejected" || student["HOD-approval"] === "approved";
   });
   console.log("filtered students hod: ", filteredStudents);
@@ -499,6 +552,17 @@ app.get("/admins/:id", (req, res) => {
     res.status(404).json({ message: "Admin not found" });
   }
 });
+app.put("/admins/:id", (req, res) => {
+  const data = loadData();
+  const index = data.admins.findIndex((s) => s.id === req.params.id);
+  if (index !== -1) {
+    data.admins[index] = { ...data.admins[index], ...req.body };
+    saveData(data);
+    res.json(data.admins[index]);
+  } else {
+    res.status(404).json({ message: "Admin not found" });
+  }
+});
 
 // Routes for handling HODs
 app.get("/hods", (req, res) => {
@@ -511,6 +575,17 @@ app.get("/hods/:department", (req, res) => {
   const hod = data.hods.find((h) => h.department === req.params.department);
   if (hod) {
     res.json(hod);
+  } else {
+    res.status(404).json({ message: "HOD not found" });
+  }
+});
+app.put("/hods/:id", (req, res) => {
+  const data = loadData();
+  const index = data.hods.findIndex((s) => s.id === req.params.id);
+  if (index !== -1) {
+    data.hods[index] = { ...data.hods[index], ...req.body };
+    saveData(data);
+    res.json(data.hods[index]);
   } else {
     res.status(404).json({ message: "HOD not found" });
   }
