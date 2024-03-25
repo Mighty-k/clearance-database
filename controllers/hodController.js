@@ -8,7 +8,7 @@ exports.addHod = (req, res) => {
         department, 
         departmentCode, 
          username,
-         fullname,
+         fullName,
           email,
          password
     } = req.body;
@@ -21,7 +21,7 @@ exports.addHod = (req, res) => {
         department, 
         departmentCode, 
          username,
-         fullname,
+         fullName,
           email,
          password,
       role: "hod",

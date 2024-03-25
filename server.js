@@ -17,9 +17,11 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(bodyParser.json());
-
-
-
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: true
+}));
 
 const dbFilePath = 'db.json';
 
@@ -54,8 +56,6 @@ const loadData = () => {
 const saveData = (data) => {
   fs.writeFileSync("db.json", JSON.stringify(data, null, 2));
 };
-
-
 
 // Function to generate OTP
 const generateOTP = () => {
@@ -94,7 +94,6 @@ const sendOTPByEmail = (email, otp) => {
     });
   });
 };
-
 
 // Function to save OTP record to JSON database
 const saveOTPRecord = (userId, email, OTP) => {
@@ -196,9 +195,7 @@ const getUserByEmail = (email) => {
   return null; // Return null if user is not found
 };
 
-
 // Function to send OTP via email
-
 
 // Authentication route
 app.post('/login', (req, res) => {
@@ -240,7 +237,6 @@ app.post('/login', (req, res) => {
     }
 });
 
-
 app.post('/logadmin',(req, res) => {
   const { username, password } = req.body;
 
@@ -256,13 +252,11 @@ app.post('/logadmin',(req, res) => {
   {
     generateOTPAndSendEmail(user.id, user.email) // Pass user ID and email to the function
     .then(otp => {
-      return res.status(200).send({ dashboard: otp, user, otp});
-      // return res.status(200).send({ dashboard: 'otp', user, otp });
+      return res.status(200).send({ dashboard: "otp", user, otp});
     })
     .catch(error => {
       return res.status(500).send('Error generating OTP and sending email');
     });
-
 
   }
 
@@ -280,14 +274,13 @@ app.patch("/api/users/:id", (req, res) => {
   res.status(200).json({ message: "User details updated successfully" });
 });
 
-
 // Endpoint to verify OTP
 app.post('/verify-otp', (req, res) => {
   const { email, otp } = req.body;
-  console.log("otp verification: ", req.body);
+  // console.log("otp verification: ", req.body);
   // Check if OTP record exists in the database
   const otpRecord = findOTPRecord(email, otp); // Implement this function to find OTP record
-  console.log("otp record: ",otpRecord);
+  // console.log("otp record: ",otpRecord);
   if (otpRecord) {
     // Check if OTP is expired (e.g., 5 minutes expiry time)
     const currentTime = Date.now();
@@ -335,9 +328,9 @@ app.post('/regenerate-otp', (req, res) => {
  });
 });
 
-
 // Logout route
 app.get('/logout', (req, res) => {
+  req.session.destroy(); // Destroy the session to clear user data
   res.status(200).send('Logout successful');
   
 });
@@ -363,8 +356,6 @@ app.get('/dashboard', (req, res) => {
     res.status(403).send('Unauthorized');
   }
 });
-
-
 
 //route for root
 app.get("/", (req, res) => {
@@ -454,19 +445,18 @@ const filterStudentsByAdminRole = (queryParams, students) => {
 
 app.get("/hod/students", (req, res) => {
   const { clearanceRequest, hodApproval, department } = req.query;
-  console.log("req_Quer: ", req.query);
+  // console.log("req_Quer: ", req.query);
 
   let filteredStudents = students.filter(student => {
     return student.clearanceRequest === clearanceRequest && student["HOD-approval"] === hodApproval 
     || student["HOD-approval"] === "rejected" || student["HOD-approval"] === "approved";
   });
-  console.log("filtered students hod: ", filteredStudents);
+  // console.log("filtered students hod: ", filteredStudents);
   if (department) {
     filteredStudents = filteredStudents.filter(student => student.department === department);
   }
   res.json(filteredStudents);
 });
-
 
 app.get("/students/:id", (req, res) => {
   const data = loadData();
@@ -518,7 +508,6 @@ app.patch("/students/:id", (req, res) => {
     res.status(404).json({ message: "Student not found" });
   }
 });
-
 
 app.delete("/students/:id", (req, res) => {
   const data = loadData();
@@ -590,4 +579,3 @@ app.put("/hods/:id", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on PORT ${PORT}`);
 });
-
