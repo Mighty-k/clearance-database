@@ -28,8 +28,13 @@ app.use(session({
 const dbFilePath = path.join(__dirname, 'db.json');
 
 // Load data from the JSON database
-const data = fs.readFileSync(dbFilePath, 'utf8');
-const { students, admins, hods, superAdmin } = JSON.parse(data);
+let data;
+try {
+  data = require('./db.json');
+} catch (err) {
+  data = JSON.parse(fs.readFileSync(dbFilePath, 'utf8'));
+}
+const { students, admins, hods, superAdmin } = data;
 
 // Middleware to handle CORS
 app.use((req, res, next) => {
@@ -52,10 +57,12 @@ app.use('/api', addHodRoutes);
 app.use('/api/users', allUsers);
 // Load data from JSON file
 const loadData = () => {
-  const rawData = fs.readFileSync(dbFilePath, 'utf8');
-  // console.log("data: ", JSON.parse(rawData));
-  return JSON.parse(rawData);
-  
+  try {
+    const rawData = fs.readFileSync(dbFilePath, 'utf8');
+    return JSON.parse(rawData);
+  } catch (err) {
+    return require('./db.json');
+  }
 };
 // Save data to JSON file
 const saveData = (data) => {
