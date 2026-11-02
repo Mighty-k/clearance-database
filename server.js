@@ -67,32 +67,37 @@ const generateOTP = () => {
   return OTP;
 };
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp-relay.brevo.com',
-  port: 587,
-  secure: false, 
-  auth: {
-    user: 'kng.seun1@gmail.com',
-    pass: 'q8UG4zMDKXLtsyZP'
-  }
-});
-const sendOTPByEmail = (email, otp) => {
-  return new Promise((resolve, reject) => {
-    const mailOptions = {
-      from: '"FYCL" kng.seun1@gmail.com',
-      to: email,
-      subject: 'OTP for Login',
-      text: `Your OTP for login is: ${otp} it will expire in the next 5 minutes`
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(info);
+const transporter = nodemailer.createTransport(
+  process.env.SMTP_HOST
+    ? {
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT) || 587,
+        secure: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465',
+        auth: {
+          user: process.env.SMTP_USER || process.env.EMAIL_USERNAME,
+          pass: process.env.SMTP_PASS || process.env.EMAIL_PASSWORD
+        }
       }
-    });
-  });
+    : {
+        service: process.env.EMAIL_SERVICE,
+        auth: {
+          user: process.env.EMAIL_USERNAME,
+          pass: process.env.EMAIL_PASSWORD
+        }
+      }
+);
+
+const sendOTPByEmail = (email, otp) => {
+  const senderName = process.env.EMAIL_SENDER || 'FYCL';
+  const senderEmail = process.env.EMAIL_FROM || process.env.EMAIL_USERNAME || process.env.SMTP_USER;
+  const mailOptions = {
+    from: `"${senderName}" <${senderEmail}>`,
+    to: email,
+    subject: 'OTP for Login',
+    text: `Your OTP for login is: ${otp} it will expire in the next 5 minutes`
+  };
+
+  return transporter.sendMail(mailOptions);
 };
 
 // Function to save OTP record to JSON database
@@ -220,21 +225,10 @@ app.post('/login', (req, res) => {
   // Compare passwords  
   if (password !== user.password) {
     return res.status(401).send('Invalid username or password');
-  }else if(user.role === 'student')
-  {
-    return res.status(200).send({ dashboard: user.role, user });
-
   }
-    else{
-     // Generate OTP, send email, and save OTP record
-     generateOTPAndSendEmail(user.id, user.email) // Pass user ID and email to the function
-     .then(otp => {
-       return res.status(200).send({ dashboard: 'otp', user, otp });
-     })
-     .catch(error => {
-       return res.status(500).send('Error generating OTP and sending email');
-     });
-    }
+
+  // OTP disabled: directly return user dashboard
+  return res.status(200).send({ dashboard: user.role, user });
 });
 
 app.post('/logadmin',(req, res) => {
@@ -248,19 +242,11 @@ app.post('/logadmin',(req, res) => {
   req.session.user = user; // Store the entire user object in session
   if (password !== user.password) {
     return res.status(401).send('Invalid username or password');
-  }else if(user.role === 'superAdmin')
-  {
-    generateOTPAndSendEmail(user.id, user.email) // Pass user ID and email to the function
-    .then(otp => {
-      return res.status(200).send({ dashboard: "otp", user, otp});
-    })
-    .catch(error => {
-      return res.status(500).send('Error generating OTP and sending email');
-    });
-
   }
 
-})
+  // OTP disabled: directly return user dashboard
+  return res.status(200).send({ dashboard: user.role, user });
+});
 // Assuming you have an endpoint for updating user details
 app.patch("/api/users/:id", (req, res) => {
   const userId = req.params.id;
@@ -274,36 +260,14 @@ app.patch("/api/users/:id", (req, res) => {
   res.status(200).json({ message: "User details updated successfully" });
 });
 
-// Endpoint to verify OTP
+// Endpoint to verify OTP (bypassed since OTP auth is disabled)
 app.post('/verify-otp', (req, res) => {
-  const { email, otp } = req.body;
-  // console.log("otp verification: ", req.body);
-  // Check if OTP record exists in the database
-  const otpRecord = findOTPRecord(email, otp); // Implement this function to find OTP record
-  // console.log("otp record: ",otpRecord);
-  if (otpRecord) {
-    // Check if OTP is expired (e.g., 5 minutes expiry time)
-    const currentTime = Date.now();
-    const otpTimestamp = otpRecord.timestamp;
-    const otpExpiry = 5 * 60 * 1000; // 5 minutes in milliseconds
-    if (currentTime - otpTimestamp <= otpExpiry) {
-      // OTP is valid and not expired
-      // Delete OTP record from the database
-      deleteOTPRecord(email, otp); // Implement this function to delete OTP record
-      
-      // Get user details based on email (assuming the user is an admin or HOD)
-      const user = getUserByEmail(email); // Implement this function to get user details
-      
-      // Redirect user to their respective dashboard
-      return res.status(200).send({ dashboard: user.role, user });
-    } else {
-      // OTP is expired
-      return res.status(401).send({ error: 'OTP expired' });
-    }
-  } else {
-    // OTP is invalid
-    return res.status(401).send({ error: 'Invalid OTP' });
+  const { email } = req.body;
+  const user = getUserByEmail(email);
+  if (user) {
+    return res.status(200).send({ dashboard: user.role, user });
   }
+  return res.status(401).send({ error: 'User not found' });
 });
 
 // Endpoint to regenerate OTP
