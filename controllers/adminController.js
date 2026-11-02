@@ -1,4 +1,4 @@
-const uuid = require('uuid');
+const { randomUUID } = require('crypto');
 const fs = require("fs");
 const path = require("path");
 const dbPath = path.join(__dirname, '../db.json');
@@ -26,7 +26,7 @@ exports.addAdmin = (req, res) => {
         fullname,
         department,
       role: "admin",
-      id: uuid.v4()
+      id: randomUUID()
     };
 
     database.admins.push(newAdmin);

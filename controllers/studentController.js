@@ -1,5 +1,5 @@
 // controllers/studentController.js
-const uuid = require('uuid');
+const { randomUUID } = require('crypto');
 const fs = require("fs");
 const path = require("path");
 const dbPath = path.join(__dirname, '../db.json');
@@ -59,7 +59,7 @@ exports.addStudent = (req, res) => {
      "registryDate":"",
       message: "no messages",
       role: "student",
-      id: uuid.v4()
+      id: randomUUID()
     };
 
     database.students.push(newStudent);

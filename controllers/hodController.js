@@ -1,4 +1,4 @@
-const uuid = require('uuid');
+const { randomUUID } = require('crypto');
 const fs = require("fs");
 const path = require("path");
 const dbPath = path.join(__dirname, '../db.json');
@@ -27,7 +27,7 @@ exports.addHod = (req, res) => {
           email,
          password,
       role: "hod",
-      id: uuid.v4()
+      id: randomUUID()
     };
 
     database.hods.push(newHod);
