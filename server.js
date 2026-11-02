@@ -17,12 +17,18 @@ const { log } = require("console");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+app.set('trust proxy', 1);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
   secret: 'your-secret-key',
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: true,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production' || !!process.env.VERCEL,
+    sameSite: (process.env.NODE_ENV === 'production' || !!process.env.VERCEL) ? 'none' : 'lax'
+  }
 }));
 
 const dbFilePath = path.join(__dirname, 'db.json');
@@ -38,14 +44,16 @@ const { students, admins, hods, superAdmin } = data;
 
 // Middleware to handle CORS
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  const origin = req.headers.origin || "*";
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, DELETE, OPTIONS, PATCH"
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-user-role"
   );
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
@@ -245,6 +253,7 @@ app.post('/login', (req, res) => {
 
   if (req.session) {
     req.session.user = user;
+    req.session.userRole = user.role;
   }
 
   // OTP disabled: directly return user dashboard
@@ -268,6 +277,7 @@ app.post('/logadmin',(req, res) => {
 
   if (req.session) {
     req.session.user = user;
+    req.session.userRole = user.role;
   }
 
   // OTP disabled: directly return user dashboard
@@ -327,21 +337,19 @@ app.get('/logout', (req, res) => {
 
 // Dashboard route
 app.get('/dashboard', (req, res) => {
-  if (!req.session.userRole) {
+  const userRole = req.session?.userRole || req.session?.user?.role || req.query?.role || req.headers['x-user-role'];
+  if (!userRole) {
     return res.status(403).send('Unauthorized');
   }
-  // Check user role from session and send appropriate dashboard data
-  const userRole = req.session.userRole;
   // Return dashboard data based on user role
   if (userRole === 'student') {
-    res.json({ dashboard: 'student'});
-    console.log('User Role:', req.session.userRole); // Log user role
+    res.json({ dashboard: 'student' });
   } else if (userRole === 'admin') {
     res.json({ dashboard: 'admin' });
-    console.log('User Role:', req.session.userRole);
   } else if (userRole === 'hod') {
     res.json({ dashboard: 'hod' });
-    console.log('User Role:', req.session.userRole);
+  } else if (userRole === 'superAdmin') {
+    res.json({ dashboard: 'superAdmin' });
   } else {
     res.status(403).send('Unauthorized');
   }
