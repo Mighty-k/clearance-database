@@ -18,6 +18,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
   secret: 'your-secret-key',
   resave: false,
@@ -30,7 +31,7 @@ const dbFilePath = path.join(__dirname, 'db.json');
 const data = fs.readFileSync(dbFilePath, 'utf8');
 const { students, admins, hods, superAdmin } = JSON.parse(data);
 
-// Middleware to handle CORS (if needed)
+// Middleware to handle CORS
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -41,6 +42,9 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
   next();
 });
 app.use('/api', addStudentRoutes);
@@ -209,48 +213,58 @@ const getUserByEmail = (email) => {
 
 // Authentication route
 app.post('/login', (req, res) => {
-  const { username, password } = req.body;
+  const { username, password } = req.body || {};
 
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Username and password are required' });
+  }
+
+  const normalizedUsername = String(username).trim();
   let user = null;
 
   // Check if the username starts with "hod_"
-  if (username.startsWith('hod_')) {
-    user = hods.find(hod => hod.username === username);
-  } else if (username.includes('/')) {
-    user = students.find(student => student.matricNumber === username);
+  if (normalizedUsername.startsWith('hod_')) {
+    user = hods.find(hod => hod.username === normalizedUsername);
+  } else if (normalizedUsername.includes('/')) {
+    user = students.find(student => student.matricNumber === normalizedUsername);
   } else {
-    user = admins.find(admin => admin.username === username);
+    user = admins.find(admin => admin.username === normalizedUsername);
   }
 
-  // Check if user exists
-  if (!user) {
-    return res.status(401).send('Invalid username or password');
+  // Check if user exists and password matches
+  if (!user || password !== user.password) {
+    return res.status(401).json({ message: 'Invalid username or password' });
   }
-  req.session.user = user; // Store the entire user object in session
-  // Compare passwords  
-  if (password !== user.password) {
-    return res.status(401).send('Invalid username or password');
+
+  if (req.session) {
+    req.session.user = user;
   }
 
   // OTP disabled: directly return user dashboard
-  return res.status(200).send({ dashboard: user.role, user });
+  return res.status(200).json({ dashboard: user.role, user });
 });
 
 app.post('/logadmin',(req, res) => {
-  const { username, password } = req.body;
+  const { username, password } = req.body || {};
 
-  let user = null;
-  user = superAdmin.find(supreadmin => supreadmin.username === username);
-  if (!user) {
-    return res.status(401).send('Invalid username or password');
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Username and password are required' });
   }
-  req.session.user = user; // Store the entire user object in session
-  if (password !== user.password) {
-    return res.status(401).send('Invalid username or password');
+
+  const normalizedUsername = String(username).trim();
+  const user = superAdmin.find(supreadmin => supreadmin.username === normalizedUsername);
+
+  // Check if user exists and password matches
+  if (!user || password !== user.password) {
+    return res.status(401).json({ message: 'Invalid username or password' });
+  }
+
+  if (req.session) {
+    req.session.user = user;
   }
 
   // OTP disabled: directly return user dashboard
-  return res.status(200).send({ dashboard: user.role, user });
+  return res.status(200).json({ dashboard: user.role, user });
 });
 // Assuming you have an endpoint for updating user details
 app.patch("/api/users/:id", (req, res) => {
@@ -542,6 +556,12 @@ app.put("/hods/:id", (req, res) => {
   } else {
     res.status(404).json({ message: "HOD not found" });
   }
+});
+
+// Global error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
 });
 
 // Start server when executed directly (local development)
