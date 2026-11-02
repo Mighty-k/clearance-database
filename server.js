@@ -9,6 +9,7 @@ const addAdminRoutes = require('./Routes/adminRoutes');
 const addHodRoutes = require('./Routes/hodRoutes');
 const allUsers = require('./Routes/getallRoutes')
 const fs = require("fs");
+const path = require("path");
 const dotenv = require("dotenv");
 dotenv.config()
 const { log } = require("console");
@@ -23,10 +24,10 @@ app.use(session({
   saveUninitialized: true
 }));
 
-const dbFilePath = 'db.json';
+const dbFilePath = path.join(__dirname, 'db.json');
 
 // Load data from the JSON database
-const data = fs.readFileSync(dbFilePath);
+const data = fs.readFileSync(dbFilePath, 'utf8');
 const { students, admins, hods, superAdmin } = JSON.parse(data);
 
 // Middleware to handle CORS (if needed)
@@ -47,14 +48,18 @@ app.use('/api', addHodRoutes);
 app.use('/api/users', allUsers);
 // Load data from JSON file
 const loadData = () => {
-  const rawData = fs.readFileSync("db.json");
+  const rawData = fs.readFileSync(dbFilePath, 'utf8');
   // console.log("data: ", JSON.parse(rawData));
   return JSON.parse(rawData);
   
 };
 // Save data to JSON file
 const saveData = (data) => {
-  fs.writeFileSync("db.json", JSON.stringify(data, null, 2));
+  try {
+    fs.writeFileSync(dbFilePath, JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error("Warning: Failed to save to db.json (read-only filesystem):", err.message);
+  }
 };
 
 // Function to generate OTP
@@ -539,9 +544,11 @@ app.put("/hods/:id", (req, res) => {
   }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on PORT ${PORT}`);
-});
+// Start server when executed directly (local development)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on PORT ${PORT}`);
+  });
+}
 
 module.exports = app;

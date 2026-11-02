@@ -1,6 +1,8 @@
 // controllers/studentController.js
 const uuid = require('uuid');
 const fs = require("fs");
+const path = require("path");
+const dbPath = path.join(__dirname, '../db.json');
 const database = require('../db.json');
 
 exports.addStudent = (req, res) => {
@@ -63,7 +65,7 @@ exports.addStudent = (req, res) => {
     database.students.push(newStudent);
     // Write to JSON database
     // Assuming your JSON database file is named 'database.json'
-    fs.writeFileSync('db.json', JSON.stringify(database, null, 2));
+    fs.writeFileSync(dbPath, JSON.stringify(database, null, 2));
 
     res.status(201).json(newStudent);
   } catch (error) {

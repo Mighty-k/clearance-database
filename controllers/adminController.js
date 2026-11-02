@@ -1,5 +1,7 @@
 const uuid = require('uuid');
 const fs = require("fs");
+const path = require("path");
+const dbPath = path.join(__dirname, '../db.json');
 const database = require('../db.json');
 
 exports.addAdmin = (req, res) => {
@@ -30,7 +32,7 @@ exports.addAdmin = (req, res) => {
     database.admins.push(newAdmin);
     // Write to JSON database
     // Assuming your JSON database file is named 'database.json'
-    fs.writeFileSync('db.json', JSON.stringify(database, null, 2));
+    fs.writeFileSync(dbPath, JSON.stringify(database, null, 2));
 
     res.status(201).json(newAdmin);
   } catch (error) {

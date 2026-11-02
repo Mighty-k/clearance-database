@@ -1,5 +1,7 @@
 const uuid = require('uuid');
 const fs = require("fs");
+const path = require("path");
+const dbPath = path.join(__dirname, '../db.json');
 const database = require('../db.json');
 
 exports.addHod = (req, res) => {
@@ -31,7 +33,7 @@ exports.addHod = (req, res) => {
     database.hods.push(newHod);
     // Write to JSON database
     // Assuming your JSON database file is named 'database.json'
-    fs.writeFileSync('db.json', JSON.stringify(database, null, 2));
+    fs.writeFileSync(dbPath, JSON.stringify(database, null, 2));
 
     res.status(201).json(newHod);
   } catch (error) {
