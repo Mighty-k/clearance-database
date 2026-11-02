@@ -11,16 +11,17 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=20.x"
+  },
   "dependencies": {
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^18.0.9",
     "express": "^5.3.0",
     "express-session": "^1.18.0",
-    "expresss": "^0.0.0",
     "json-serve": "^0.1.0",
     "json-server": "^1.0.0-beta.15",
-    "node": "^27.0.0-alpha.0.0.0",
     "nodemailer": "^10.3.1",
     "nodemon": "^3.1.14",
     "otp-generator": "^4.0.1",
